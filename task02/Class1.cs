@@ -6,52 +6,60 @@ namespace task02
 {
     public class Student
     {
-        public string Name { get; set; }
-        public string Faculty { get; set; }
-        public List<int> Grades { get; set; }
+        public required string Name { get; set; }
+        public required string Faculty { get; set; }
+        public List<int>? Grades { get; set; }
     }
 
     public class StudentService
     {
         private readonly List<Student> _students;
 
-        public StudentService(List<Student> students) => 
+        public StudentService(List<Student> students)
+        {
             _students = students ?? new List<Student>();
+        }
 
-        public IEnumerable<Student> GetStudentsByFaculty(string faculty) => 
-            _students.Where(s => s.Faculty == faculty);
+        public IEnumerable<Student> GetStudentsByFaculty(string faculty)
+        {
+            return from student in _students
+                   where student.Faculty == faculty
+                   select student;
+        }
 
-        public IEnumerable<Student> GetStudentsWithMinAverageGrade(double minGrade) => 
-            _students
-                .Where(s => s.Grades?.Any() == true)
-                .Where(s => s.Grades.Average() >= minGrade);
+        public IEnumerable<Student> GetStudentsWithMinAverageGrade(double minGrade)
+        {
+            return _students
+                .Where(s => s.Grades != null && s.Grades.Any())
+                .Where(s => s.Grades!.Average() >= minGrade);
+        }
 
-        public IEnumerable<Student> GetStudentsOrderedByName() => 
-            _students
-                .Where(s => !string.IsNullOrEmpty(s.Name))
+        public IEnumerable<Student> GetStudentsOrderedByName()
+        {
+            return _students
                 .OrderBy(s => s.Name, StringComparer.CurrentCulture);
+        }
 
-        public ILookup<string, Student> GroupStudentsByFaculty() => 
-            _students
-                .Where(s => s.Faculty != null)
-                .ToLookup(s => s.Faculty);
+        public ILookup<string, Student> GroupStudentsByFaculty()
+        {
+            return _students.ToLookup(s => s.Faculty);
+        }
 
-        public string GetFacultyWithHighestAverageGrade()
+        public string? GetFacultyWithHighestAverageGrade()
         {
             var facultiesWithGrades = _students
-                .Where(s => s.Faculty != null && s.Grades?.Any() == true)
-                .GroupBy(s => s.Faculty);
-
-            if (!facultiesWithGrades.Any())
-                return null;
-
-            return facultiesWithGrades
-                .Select(g => new {
-                    Faculty = g.Key,
-                    Avg = g.Average(s => s.Grades.Average())
+                .Where(s => s.Grades != null && s.Grades.Any())
+                .GroupBy(s => s.Faculty)
+                .Select(group => new
+                {
+                    FacultyName = group.Key,
+                    AvgScore = group.Average(s => s.Grades!.Average()) 
                 })
-                .OrderByDescending(x => x.Avg)
-                .First().Faculty;
+                .ToList();
+
+            return facultiesWithGrades.Any() 
+                ? facultiesWithGrades.OrderByDescending(x => x.AvgScore).First().FacultyName 
+                : null;
         }
     }
 }
