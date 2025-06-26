@@ -1,22 +1,23 @@
 using System;
+using System.Linq;
+
 namespace task01;
 
 public static class StringExtensions
 {
     public static bool IsPalindrome(this string input)
     {
-        if (string.IsNullOrEmpty(input))
+        if (input == null || input.Length == 0)
             return false;
 
         var cleaned = new string(input
-            .ToLower()
-            .Where(c => char.IsLetter(c))
+            .ToLowerInvariant()
+            .Where(c => !char.IsPunctuation(c) && !char.IsWhiteSpace(c))
             .ToArray());
 
-        if (string.IsNullOrEmpty(cleaned))
+        if (cleaned.Length == 0)
             return false;
 
-        var reversed = new string(cleaned.Reverse().ToArray());
-        return cleaned == reversed;
+        return cleaned.SequenceEqual(cleaned.Reverse());
     }
 }
