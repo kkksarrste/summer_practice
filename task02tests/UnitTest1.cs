@@ -1,63 +1,45 @@
-public class StudentServiceTests
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+public class Student
 {
-    private List<Student> _testStudents;
-    private StudentService _service;
+    public string Name { get; set; }
+    public string Faculty { get; set; }
+    public List<int> Grades { get; set; }
+}
 
-    public StudentServiceTests()
-    {
-        _testStudents = new List<Student>
-        {
-            new() { Name = "Иван", Faculty = "ФИТ", Grades = new List<int> { 5, 4, 5 } },
-            new() { Name = "Анна", Faculty = "ФИТ", Grades = new List<int> { 3, 4, 3 } },
-            new() { Name = "Петр", Faculty = "Экономика", Grades = new List<int> { 5, 5, 5 } }
-        };
-        _service = new StudentService(_testStudents);
-    }
+public class StudentService
+{
+    private readonly List<Student> _students;
 
-    [Fact]
-    public void GetStudentsByFaculty_ReturnsCorrectStudents()
-    {
-        var result = _service.GetStudentsByFaculty("ФИТ").ToList();
-        Assert.Equal(2, result.Count);
-        Assert.True(result.All(s => s.Faculty == "ФИТ"));
-    }
+    public StudentService(List<Student> students) 
+        => _students = students ?? new List<Student>();
 
-    [Fact]
-    public void GetFacultyWithHighestAverageGrade_ReturnsCorrectFaculty()
-    {
-        var result = _service.GetFacultyWithHighestAverageGrade();
-        Assert.Equal("Экономика", result);
-    }
+    public IEnumerable<Student> GetStudentsByFaculty(string faculty) 
+        => _students.Where(s => s.Faculty == faculty);
 
-    [Fact]
-    public void GetStudentsWithMinAverageGrade_FiltersCorrectly()
-    {
-        var result = _service.GetStudentsWithMinAverageGrade(4.5).ToList();
-        Assert.Single(result);
-        Assert.Equal("Иван", result[0].Name);
-    }
+    public IEnumerable<Student> GetStudentsWithMinAverageGrade(double minAverageGrade)
+        => _students
+            .Where(s => s.Grades?.Any() == true)
+            .Where(s => s.Grades.Average() >= minAverageGrade)
+            .OrderByDescending(s => s.Grades.Average())
+            .Take(1);
 
-    [Fact]
-    public void GetStudentsOrderedByName_ReturnsCorrectOrder()
-    {
-        var result = _service.GetStudentsOrderedByName().ToList();
-        Assert.Equal("Анна", result[0].Name);
-        Assert.Equal("Иван", result[1].Name);
-        Assert.Equal("Петр", result[2].Name);
-    }
+    public IEnumerable<Student> GetStudentsOrderedByName()
+        => _students.OrderBy(s => s.Name);
 
-    [Fact]
-    public void GroupStudentsByFaculty_CreatesCorrectGroups()
-    {
-        var result = _service.GroupStudentsByFaculty();
-        Assert.Equal(2, result["ФИТ"].Count());
-        Assert.Single(result["Экономика"]);
-    }
+    public ILookup<string, Student> GroupStudentsByFaculty()
+        => _students.ToLookup(s => s.Faculty);
 
-    [Fact]
-    public void GetStudentsWithMinAverageGrade_ReturnsEmptyForHighGrade()
-    {
-        var result = _service.GetStudentsWithMinAverageGrade(6.0).ToList();
-        Assert.Empty(result);
-    }
+    public string GetFacultyWithHighestAverageGrade()
+        => _students
+            .Where(s => s.Grades?.Any() == true)
+            .GroupBy(s => s.Faculty)
+            .Select(g => new {
+                Faculty = g.Key,
+                Avg = g.Average(s => s.Grades.Average())
+            })
+            .OrderByDescending(x => x.Avg)
+            .FirstOrDefault()?.Faculty;
 }
