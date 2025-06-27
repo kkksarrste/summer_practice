@@ -3,44 +3,41 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace task03
+public class CustomCollection<T> : IEnumerable<T>
 {
-    public class CustomCollection<T> : IEnumerable<T>
+    private readonly List<T> _items = new List<T>();
+
+    public void Add(T item)
     {
-        private readonly List<T> _items = new List<T>();
+        _items.Add(item);
+    }
 
-        public void Add(T item)
+    public bool Remove(T item)
+    {
+        return _items.Remove(item);
+    }
+
+    public IEnumerator<T> GetEnumerator() => _items.GetEnumerator();
+
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+    public IEnumerable<T> GetReverseEnumerator()
+    {
+        for (int i = _items.Count - 1; i >= 0; i--)
         {
-            _items.Add(item);
+            yield return _items[i];
         }
+    }
 
-        public bool Remove(T item)
-        {
-            return _items.Remove(item);
-        }
+    public static IEnumerable<int> GenerateSequence(int start, int count)
+    {
+        return Enumerable.Range(start, count);
+    }
 
-        public IEnumerator<T> GetEnumerator() => _items.GetEnumerator();
-
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-        public IEnumerable<T> GetReverseEnumerator()
-        {
-            for (int i = _items.Count - 1; i >= 0; i--)
-            {
-                yield return _items[i];
-            }
-        }
-
-        public static IEnumerable<int> GenerateSequence(int start, int count)
-        {
-            return Enumerable.Range(start, count);
-        }
-
-        public IEnumerable<T> FilterAndSort(Func<T, bool> predicate, Func<T, IComparable> keySelector)
-        {
-            return _items
-                .Where(predicate)
-                .OrderBy(keySelector);
-        }
+    public IEnumerable<T> FilterAndSort(Func<T, bool> predicate, Func<T, IComparable> keySelector)
+    {
+        return _items
+            .Where(predicate)
+            .OrderBy(keySelector);
     }
 }
