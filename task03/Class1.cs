@@ -3,41 +3,44 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-public class CustomCollection<T> : IEnumerable<T>
+namespace task03
 {
-    private readonly List<T> _items = new List<T>();
-
-    public void Add(T item)
+    public class CustomCollection<T> : IEnumerable<T>
     {
-        _items.Add(item);
-    }
+        private readonly List<T> _items = new List<T>();
 
-    public bool Remove(T item)
-    {
-        return _items.Remove(item);
-    }
-
-    public IEnumerator<T> GetEnumerator() => _items.GetEnumerator();
-
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-    public IEnumerable<T> GetReverseEnumerator()
-    {
-        for (int i = _items.Count - 1; i >= 0; i--)
+        public void Add(T item)
         {
-            yield return _items[i];
+            _items.Add(item);
         }
-    }
 
-    public static IEnumerable<int> GenerateSequence(int start, int count)
-    {
-        return Enumerable.Range(start, count);
-    }
+        public bool Remove(T item)
+        {
+            return _items.Remove(item);
+        }
 
-    public IEnumerable<T> FilterAndSort(Func<T, bool> predicate, Func<T, IComparable> keySelector)
-    {
-        return _items
-            .Where(predicate)
-            .OrderBy(keySelector);
+        public IEnumerator<T> GetEnumerator() => _items.GetEnumerator();
+
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public IEnumerable<T> GetReverseEnumerator()
+        {
+            for (int i = _items.Count - 1; i >= 0; i--)
+            {
+                yield return _items[i];
+            }
+        }
+
+        public static IEnumerable<int> GenerateSequence(int start, int count)
+        {
+            return Enumerable.Range(start, count);
+        }
+
+        public IEnumerable<T> FilterAndSort(Func<T, bool> predicate, Func<T, IComparable> keySelector)
+        {
+            return _items
+                .Where(predicate)
+                .OrderBy(keySelector);
+        }
     }
 }
