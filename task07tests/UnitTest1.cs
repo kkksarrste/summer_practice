@@ -1,5 +1,6 @@
 using Xunit;
 using task07;
+using System.Reflection;
 
 public class AttributeReflectionTests
 {
@@ -7,7 +8,7 @@ public class AttributeReflectionTests
     public void Class_HasDisplayNameAttribute()
     {
         var type = typeof(SampleClass);
-        var attribute = type.GetCustomAttribute<DisplayNameAttribute>();
+        var attribute = Attribute.GetCustomAttribute(type, typeof(DisplayNameAttribute)) as DisplayNameAttribute;
         Assert.NotNull(attribute);
         Assert.Equal("Пример класса", attribute.DisplayName);
     }
@@ -16,7 +17,7 @@ public class AttributeReflectionTests
     public void Method_HasDisplayNameAttribute()
     {
         var method = typeof(SampleClass).GetMethod("TestMethod");
-        var attribute = method.GetCustomAttribute<DisplayNameAttribute>();
+        var attribute = Attribute.GetCustomAttribute(method, typeof(DisplayNameAttribute)) as DisplayNameAttribute;
         Assert.NotNull(attribute);
         Assert.Equal("Тестовый метод", attribute.DisplayName);
     }
@@ -25,7 +26,7 @@ public class AttributeReflectionTests
     public void Property_HasDisplayNameAttribute()
     {
         var prop = typeof(SampleClass).GetProperty("Number");
-        var attribute = prop.GetCustomAttribute<DisplayNameAttribute>();
+        var attribute = Attribute.GetCustomAttribute(prop, typeof(DisplayNameAttribute)) as DisplayNameAttribute;
         Assert.NotNull(attribute);
         Assert.Equal("Числовое свойство", attribute.DisplayName);
     }
@@ -34,7 +35,7 @@ public class AttributeReflectionTests
     public void Class_HasVersionAttribute()
     {
         var type = typeof(SampleClass);
-        var attribute = type.GetCustomAttribute<VersionAttribute>();
+        var attribute = Attribute.GetCustomAttribute(type, typeof(VersionAttribute)) as VersionAttribute;
         Assert.NotNull(attribute);
         Assert.Equal(1, attribute.Major);
         Assert.Equal(0, attribute.Minor);
