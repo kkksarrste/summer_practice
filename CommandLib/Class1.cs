@@ -1,6 +1,7 @@
-﻿namespace CommandLib;
-
-public class Class1
+namespace CommandLib
 {
-
+    public interface ICommand
+    {
+        void Execute();
+    }
 }
