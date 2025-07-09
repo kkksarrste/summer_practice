@@ -20,16 +20,18 @@ public class DefiniteIntegral
         if (threadsNumber < 1) threadsNumber = 1;
         if (step <= 0) step = 1e-5;
         
-        double segmentLength = (b - a) / threadsNumber;
         sharedResult = 0;
+        Barrier barrier = new Barrier(threadsNumber + 1);
+        
+        double totalLength = b - a;
+        double stepsPerThread = totalLength / threadsNumber;
         
         Thread[] threads = new Thread[threadsNumber];
-        Barrier barrier = new Barrier(threadsNumber + 1);
         
         for (int i = 0; i < threadsNumber; i++)
         {
-            double start = a + i * segmentLength;
-            double end = (i == threadsNumber - 1) ? b : start + segmentLength;
+            double start = a + i * stepsPerThread;
+            double end = (i == threadsNumber - 1) ? b : start + stepsPerThread;
             
             IntegralData data = new IntegralData
             {
