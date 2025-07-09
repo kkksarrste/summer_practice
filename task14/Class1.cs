@@ -5,14 +5,15 @@ class DefiniteIntegral
 {
     private class IntegralData
     {
-        public double Start;
-        public double End;
-        public Func<double, double> Function;
-        public double Step;
-        public Barrier Barrier;
+        public double Start { get; set; }
+        public double End { get; set; }
+        public Func<double, double> Function { get; set; } = x => x;
+        public double Step { get; set; }
+        public Barrier Barrier { get; set; } = new Barrier(1);
     }
 
     private static double sharedResult;
+    private static readonly object lockObj = new object();
     
     public static double Solve(double a, double b, Func<double, double> function, double step, int threadsNumber)
     {
@@ -53,9 +54,10 @@ class DefiniteIntegral
         return sharedResult;
     }
     
-    private static void CalculatePartialIntegral(object data)
+    private static void CalculatePartialIntegral(object? data)
     {
-        IntegralData integralData = (IntegralData)data;
+        if (data is not IntegralData integralData) return;
+        
         double a = integralData.Start;
         double b = integralData.End;
         Func<double, double> function = integralData.Function;
@@ -73,7 +75,11 @@ class DefiniteIntegral
             x = nextX;
         }
         
-        Interlocked.Add(ref sharedResult, sum);
+        lock (lockObj)
+        {
+            sharedResult += sum;
+        }
+        
         integralData.Barrier.SignalAndWait();
     }
-}
+} 
