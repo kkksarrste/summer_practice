@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
 
-class DefiniteIntegral
+public class DefiniteIntegral
 {
     private class IntegralData
     {
@@ -82,4 +82,4 @@ class DefiniteIntegral
         
         integralData.Barrier.SignalAndWait();
     }
-} 
+}
