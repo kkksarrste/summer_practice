@@ -12,7 +12,7 @@ public class ServerThread
     private readonly Thread _thread;
     private readonly ConcurrentQueue<ICommand> _commandQueue = new();
     private volatile bool _isRunning;
-    private bool _stopRequested;
+    private readonly ManualResetEventSlim _commandAvailable = new();
 
     public ServerThread(string name)
     {
@@ -28,29 +28,32 @@ public class ServerThread
         }
     }
 
-    public void AddCommand(ICommand command) => _commandQueue.Enqueue(command);
+    public void AddCommand(ICommand command)
+    {
+        _commandQueue.Enqueue(command);
+        _commandAvailable.Set();
+    }
 
     private void Run()
     {
-        while (_isRunning && !_stopRequested)
+        while (_isRunning)
         {
             if (_commandQueue.TryDequeue(out var cmd))
             {
                 cmd.Execute();
+                continue;
             }
-            else 
-            {
-                Thread.Sleep(10);
-            }
+            _commandAvailable.Wait(10);
+            _commandAvailable.Reset();
         }
-        _isRunning = false;
     }
 
     public void Stop(bool hardStop)
     {
         if (hardStop)
         {
-            _stopRequested = true;
+            _isRunning = false;
+            _commandAvailable.Set();
         }
         else
         {
