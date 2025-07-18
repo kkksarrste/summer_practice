@@ -18,7 +18,14 @@ public class ServerThread
         _thread = new Thread(Run) { Name = name, IsBackground = true };
     }
 
-    public void Start() => _isRunning = _thread.IsAlive ? false : (_thread.Start(), _isRunning = true).Item2;
+    public void Start()
+    {
+        if (!_thread.IsAlive)
+        {
+            _isRunning = true;
+            _thread.Start();
+        }
+    }
 
     public void AddCommand(ICommand command) => _commandQueue.Enqueue(command);
 
@@ -27,15 +34,22 @@ public class ServerThread
         while (_isRunning)
         {
             if (_commandQueue.TryDequeue(out var cmd))
-                try { cmd.Execute(); } catch { /* Игнорируем ошибки */ }
-            else Thread.Sleep(10);
+            {
+                cmd.Execute();
+            }
+            else 
+            {
+                Thread.Sleep(10);
+            }
         }
     }
 
     public void Stop(bool hardStop)
     {
-        if (hardStop) _isRunning = false;
-        else AddCommand(new SoftStopCommand(this));
+        if (hardStop) 
+            _isRunning = false;
+        else 
+            AddCommand(new SoftStopCommand(this));
     }
 
     private class HardStopCommand : ICommand
