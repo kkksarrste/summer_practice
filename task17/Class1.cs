@@ -52,14 +52,14 @@ public class ServerThread
             AddCommand(new SoftStopCommand(this));
     }
 
-    private class HardStopCommand : ICommand
+    public class HardStopCommand : ICommand
     {
         private readonly ServerThread _server;
         public HardStopCommand(ServerThread server) => _server = server;
         public void Execute() => _server._isRunning = false;
     }
 
-    private class SoftStopCommand : ICommand
+    public class SoftStopCommand : ICommand
     {
         private readonly ServerThread _server;
         public SoftStopCommand(ServerThread server) => _server = server;
