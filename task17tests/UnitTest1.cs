@@ -10,12 +10,15 @@ public class ServerThreadTests
         var server = new ServerThread("Test");
         bool executed = false;
         
-        server.AddCommand(new TestCommand(() => executed = true));
+        server.AddCommand(new TestCommand(() => {
+            Thread.Sleep(500);
+            executed = true;
+        }));
         server.AddCommand(new ServerThread.HardStopCommand(server));
         server.Start();
         
         Thread.Sleep(100);
-        Assert.False(executed); 
+        Assert.False(executed);
     }
 
     [Fact]
